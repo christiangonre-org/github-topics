@@ -11,3 +11,5 @@ services:
       #USER_NAME: 
       ORG_NAME: GoogleContainerTools
       LOG_LEVEL: INFO
+      # LIST_UNTAGGED_REPOS: true
+      # TOPICS_LIST: '["docker"]'

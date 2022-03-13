@@ -176,11 +176,13 @@ if __name__ == "__main__":
     file_name = os.environ.get("FILE_NAME", "README.md")
     user_name = os.environ.get("USER_NAME")
     org_name = os.environ.get("ORG_NAME", "GoogleContainerTools")
-    list_untagged_repost = os.environ.get("LIST_UNTAGGED_REPOS", "false")
-    topics_list = os.environ.get("TOPICS_LIST")
+    list_untagged_repos = os.environ.get("LIST_UNTAGGED_REPOS", "false")
+    topics_list = json.loads(
+        os.environ.get("TOPICS_LIST")
+    )  # Convert given env variable to python list
 
     url_target = specify_github_url_name(user_name=user_name, org_name=org_name)
-    repos = get_repos_topics(url=url_target, list_untagged_repos=list_untagged_repost)
+    repos = get_repos_topics(url=url_target, list_untagged_repos=list_untagged_repos)
 
     # Check if the user provided a topics list to filter the repos output
     if topics_list is None:
