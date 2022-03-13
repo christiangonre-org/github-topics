@@ -23,6 +23,9 @@ inputs:
   LIST_UNTAGGED_REPOS:
     description: Print the untagged repositories as output
     required: false
+  LIST_TOPICS_NEEDED:
+    description: Use this list to filter the topics from all the repositories of the User/Organization
+    required: false
 runs:
   using: "docker"
   image: "Dockerfile"

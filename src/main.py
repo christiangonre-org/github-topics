@@ -39,9 +39,9 @@ def specify_github_url_name(user_name, org_name):
         return "https://api.github.com/orgs/{}/repos".format(org_name)
 
 
-def get_repos_topics(url, list_untagged_repos, topics_list):
+def get_repos_topics(url, list_untagged_repos):
     """
-    Returns a JSON with the repositories and their topics
+    Returns a JSON with all the repositores values
 
     Filter the repositories with their topics assigned.
     """
@@ -55,20 +55,46 @@ def get_repos_topics(url, list_untagged_repos, topics_list):
         "This is the response code from Github request: %s".format(response.status_code)
     )
 
-    repos_json = {}
-    topics_regex = re.compile(".*({})$".format("|".join(topics_list)))
+    if list_untagged_repos == "true":
+        for repo in json.loads(response.content):
+            if repo.get("topics") == []:
+                logging.info("Repo without topics asigned: {}".format(repo.get("name")))
 
-    for repo in json.loads(response.content):
-        if re.match(topics_regex, repo.get("topics")):
-            logging.info(repo.get("name"))
+    return response.content
+
+
+def get_repos_with_topics(repos):
+    """
+    Returns a JSON list with repos with topics
+    """
+    repos_json = {}
+
+    for repo in json.loads(repos):
         if repo.get("topics") != []:
             repos_json[repo.get("name")] = repo.get("topics")
-        # Print repos without topics assigned
-        if list_untagged_repos == "true" and repo.get("topics") == []:
-            logging.info("Repo without topics asigned: {}".format(repo.get("name")))
 
     logging.debug("This is the JSON generated")
     logging.debug(repos_json)
+
+    return repos_json
+
+
+def get_repos_with_regex(repos, list_topics):
+    """
+    Returns a JSON list with repos and topic filtered using a list of necessary topics
+    """
+    repos_json = {}
+    topics_regex = re.compile(".*({}).*".format("|".join(list_topics)))
+
+    for repo in json.loads(repos):
+        if repo.get("topics") != []:
+            logging.info(repo.get("topics"))
+            if re.match(topics_regex, ",".join(repo.get("topics"))):
+                repos_json[repo.get("name")] = repo.get("topics")
+
+    logging.debug("This is the JSON generated")
+    logging.debug(repos_json)
+
     return repos_json
 
 
@@ -151,14 +177,17 @@ if __name__ == "__main__":
     user_name = os.environ.get("USER_NAME")
     org_name = os.environ.get("ORG_NAME", "GoogleContainerTools")
     list_untagged_repost = os.environ.get("LIST_UNTAGGED_REPOS", "false")
-    topics_list = os.environ.get("TOPICS_LIST", ["docker"])
+    topics_list = os.environ.get("TOPICS_LIST")
 
     url_target = specify_github_url_name(user_name=user_name, org_name=org_name)
-    repo_topics = get_repos_topics(
-        url=url_target,
-        list_untagged_repos=list_untagged_repost,
-        topics_list=topics_list,
-    )
+    repos = get_repos_topics(url=url_target, list_untagged_repos=list_untagged_repost)
+
+    # Check if the user provided a topics list to filter the repos output
+    if topics_list is None:
+        repo_topics = get_repos_with_topics(repos=repos)
+    else:
+        repo_topics = get_repos_with_regex(repos=repos, list_topics=topics_list)
+
     clean_brackets_content(
         init_template_comment=init_template_comment,
         end_template_comment=end_template_comment,
