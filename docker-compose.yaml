@@ -1,0 +1,13 @@
+version: '3'
+services:
+  web:
+    build: .
+    volumes:
+      - ./README.md:/app/README.md
+    environment:
+      INIT_TEMPLATE_COMMENT: <!-- BEGIN_DOCS -->
+      END_TEMPLATE_COMMENT: <!-- END_DOCS -->
+      FILE_NAME: README.md
+      #USER_NAME: 
+      ORG_NAME: GoogleContainerTools
+      LOG_LEVEL: INFO

@@ -1,0 +1,28 @@
+name: "Github actions README topics generator"
+description: "Github Actions that created a table based on the given topics that are declared in the repos in your organization or personal account"
+author: "Christian Gonzalez Redruello"
+inputs:
+  INIT_TEMPLATE_COMMENT:
+    description: Init template comment that the program will use to start generating the MD table
+    default: "<!-- BEGIN_DOCS -->"
+    required: false
+  END_TEMPLATE_COMMENT:
+    description: Init template comment that the program will use to start generating the MD table
+    default: "<!-- END_DOCS -->"
+    required: false
+  FILE_NAME:
+    description: File name were you will overwrite the documentation
+    default: "README.md"
+    required: false
+  USER_NAME:
+    description: Username whose you want to list their repos
+    required: false
+  ORG_NAME:
+    description: Organization name whose you want to list their repos
+    required: false
+  LIST_UNTAGGED_REPOS:
+    description: Print the untagged repositories as output
+    required: false
+runs:
+  using: "docker"
+  image: "Dockerfile"
