@@ -3,6 +3,7 @@ import requests
 import json
 import logging
 import os
+import re
 
 
 def setup_logger():
@@ -15,7 +16,7 @@ def setup_logger():
     )
 
 
-def specify_github_name(user_name, org_name):
+def specify_github_url_name(user_name, org_name):
     """
     Returns a full URL with the given USER_NAME or ORG_NAME variable.
 
@@ -38,7 +39,7 @@ def specify_github_name(user_name, org_name):
         return "https://api.github.com/orgs/{}/repos".format(org_name)
 
 
-def get_repos_topics(url, list_untagged_repos):
+def get_repos_topics(url, list_untagged_repos, topics_list):
     """
     Returns a JSON with the repositories and their topics
 
@@ -55,7 +56,11 @@ def get_repos_topics(url, list_untagged_repos):
     )
 
     repos_json = {}
+    topics_regex = re.compile(".*({})$".format("|".join(topics_list)))
+
     for repo in json.loads(response.content):
+        if re.match(topics_regex, repo.get("topics")):
+            logging.info(repo.get("name"))
         if repo.get("topics") != []:
             repos_json[repo.get("name")] = repo.get("topics")
         # Print repos without topics assigned
@@ -146,10 +151,13 @@ if __name__ == "__main__":
     user_name = os.environ.get("USER_NAME")
     org_name = os.environ.get("ORG_NAME", "GoogleContainerTools")
     list_untagged_repost = os.environ.get("LIST_UNTAGGED_REPOS", "false")
+    topics_list = os.environ.get("TOPICS_LIST", ["docker"])
 
-    url_target = specify_github_name(user_name=user_name, org_name=org_name)
+    url_target = specify_github_url_name(user_name=user_name, org_name=org_name)
     repo_topics = get_repos_topics(
-        url=url_target, list_untagged_repos=list_untagged_repost
+        url=url_target,
+        list_untagged_repos=list_untagged_repost,
+        topics_list=topics_list,
     )
     clean_brackets_content(
         init_template_comment=init_template_comment,
